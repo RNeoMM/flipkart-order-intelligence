@@ -8,9 +8,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
 
-# ---------------------------------------------------------
-# 1. Load dataset
-# ---------------------------------------------------------
+
 DATA_PATH = Path(__file__).resolve().parent / "orders_dataset.csv"
 df = pd.read_csv(DATA_PATH)
 
@@ -18,17 +16,13 @@ print("=" * 60)
 print("TASK 3 - PREPROCESSING")
 print("=" * 60)
 
-# ---------------------------------------------------------
-# 2. Separate features and target
-# ---------------------------------------------------------
+
 target = "returned"
 
 X = df.drop(columns=[target, "order_id"])
 y = df[target]
 
-# ---------------------------------------------------------
-# 3. Identify numeric and categorical columns
-# ---------------------------------------------------------
+
 categorical_features = [
     "product_category",
     "payment_method",
@@ -46,11 +40,7 @@ numeric_features = [
     "rating_given",
 ]
 
-# ---------------------------------------------------------
-# 4. Numeric preprocessing
-#    - median imputation
-#    - standard scaling
-# ---------------------------------------------------------
+
 numeric_pipeline = Pipeline(
     steps=[
         ("imputer", SimpleImputer(strategy="median")),
@@ -58,11 +48,7 @@ numeric_pipeline = Pipeline(
     ]
 )
 
-# ---------------------------------------------------------
-# 5. Categorical preprocessing
-#    - most-frequent imputation
-#    - one-hot encoding
-# ---------------------------------------------------------
+
 categorical_pipeline = Pipeline(
     steps=[
         ("imputer", SimpleImputer(strategy="most_frequent")),
@@ -70,9 +56,8 @@ categorical_pipeline = Pipeline(
     ]
 )
 
-# ---------------------------------------------------------
-# 6. Combine preprocessing
-# ---------------------------------------------------------
+
+
 preprocessor = ColumnTransformer(
     transformers=[
         ("num", numeric_pipeline, numeric_features),
@@ -80,9 +65,7 @@ preprocessor = ColumnTransformer(
     ]
 )
 
-# ---------------------------------------------------------
-# 7. Stratified 80/20 train-test split
-# ---------------------------------------------------------
+
 X_train, X_test, y_train, y_test = train_test_split(
     X,
     y,
@@ -97,12 +80,10 @@ print(f"Test rows: {len(X_test)}")
 print(f"\nTraining return rate: {y_train.mean():.4f}")
 print(f"Test return rate: {y_test.mean():.4f}")
 
-# ---------------------------------------------------------
-# 8. Fit ONLY on training data
-# ---------------------------------------------------------
+
 X_train_processed = preprocessor.fit_transform(X_train)
 
-# Transform test data using the already-fitted preprocessor
+
 X_test_processed = preprocessor.transform(X_test)
 
 print("\nPreprocessing completed successfully.")
@@ -111,9 +92,7 @@ print("Test transformed shape:", X_test_processed.shape)
 
 print("\nImportant: the preprocessor was FIT only on X_train.")
 
-# ---------------------------------------------------------
-# TASK 4 - DUMMY CLASSIFIER BASELINE
-# ---------------------------------------------------------
+
 from sklearn.dummy import DummyClassifier
 from sklearn.metrics import accuracy_score, f1_score
 
@@ -136,9 +115,7 @@ print(f"\nDummy accuracy: {dummy_accuracy:.4f}")
 print(f"Dummy F1 (returned=1): {dummy_f1:.4f}")
 
 
-# ---------------------------------------------------------
-# TASK 5 - LOGISTIC REGRESSION
-# ---------------------------------------------------------
+
 import numpy as np
 
 from sklearn.linear_model import LogisticRegression
@@ -154,7 +131,7 @@ print("\n" + "=" * 60)
 print("TASK 5 - LOGISTIC REGRESSION")
 print("=" * 60)
 
-# Train Logistic Regression with balanced class weights
+
 logistic_model = LogisticRegression(
     class_weight="balanced",
     random_state=42,
@@ -163,9 +140,7 @@ logistic_model = LogisticRegression(
 
 logistic_model.fit(X_train_processed, y_train)
 
-# ---------------------------------------------------------
-# Default threshold = 0.50
-# ---------------------------------------------------------
+
 logistic_probabilities = logistic_model.predict_proba(
     X_test_processed
 )[:, 1]
@@ -195,10 +170,7 @@ print(f"Recall   : {recall_05:.4f}")
 print(f"F1       : {f1_05:.4f}")
 print(f"ROC-AUC  : {roc_auc:.4f}")
 
-# ---------------------------------------------------------
-# Threshold sweep: 0.10 to 0.90
-# Step size = 0.02
-# ---------------------------------------------------------
+
 thresholds = np.arange(0.10, 0.9001, 0.02)
 
 threshold_results = []
@@ -240,7 +212,7 @@ for threshold in thresholds:
 
 threshold_df = pd.DataFrame(threshold_results)
 
-# Find threshold with maximum F1
+
 best_row = threshold_df.loc[
     threshold_df["f1"].idxmax()
 ]
@@ -277,9 +249,7 @@ print(
 )
 
 
-# ---------------------------------------------------------
-# TASK 6 - RANDOM FOREST + GRID SEARCH
-# ---------------------------------------------------------
+
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import GridSearchCV, StratifiedKFold
 from sklearn.pipeline import Pipeline
@@ -289,8 +259,7 @@ print("\n" + "=" * 60)
 print("TASK 6 - RANDOM FOREST + GRID SEARCH")
 print("=" * 60)
 
-# Build the full pipeline:
-# preprocessing + Random Forest
+
 rf_pipeline = Pipeline(
     steps=[
         ("preprocessor", preprocessor),
@@ -305,20 +274,20 @@ rf_pipeline = Pipeline(
     ]
 )
 
-# Required parameter grid
+
 param_grid = {
     "classifier__n_estimators": [100, 200],
     "classifier__max_depth": [6, 10, None],
 }
 
-# 5-fold stratified cross-validation
+
 cv = StratifiedKFold(
     n_splits=5,
     shuffle=True,
     random_state=42,
 )
 
-# Grid search using ROC-AUC
+
 grid_search = GridSearchCV(
     estimator=rf_pipeline,
     param_grid=param_grid,
@@ -328,9 +297,7 @@ grid_search = GridSearchCV(
     refit=True,
 )
 
-# IMPORTANT:
-# Fit the complete pipeline on the ORIGINAL training data.
-# The pipeline will fit preprocessing only within each CV training fold.
+
 grid_search.fit(X_train, y_train)
 
 print("\nBest Random Forest parameters:")
@@ -341,7 +308,7 @@ print(
     f"{grid_search.best_score_:.4f}"
 )
 
-# Held-out test-set ROC-AUC
+
 rf_best_pipeline = grid_search.best_estimator_
 
 rf_test_probabilities = rf_best_pipeline.predict_proba(
@@ -358,25 +325,21 @@ print(
     f"{rf_test_roc_auc:.4f}"
 )
 
-# ---------------------------------------------------------
-# TASK 7 - RANDOM FOREST FEATURE IMPORTANCE
-# ---------------------------------------------------------
+
 from sklearn.inspection import permutation_importance
 
 print("\n" + "=" * 60)
 print("TASK 7 - FEATURE IMPORTANCE")
 print("=" * 60)
 
-# Get the fitted preprocessing and Random Forest objects
+
 fitted_preprocessor = rf_best_pipeline.named_steps["preprocessor"]
 rf_model = rf_best_pipeline.named_steps["classifier"]
 
-# Get transformed feature names
+
 feature_names = fitted_preprocessor.get_feature_names_out()
 
-# ---------------------------------------------------------
-# 1. Impurity-based feature importance
-# ---------------------------------------------------------
+
 impurity_importances = rf_model.feature_importances_
 
 impurity_df = pd.DataFrame(
@@ -399,9 +362,7 @@ print(
     )
 )
 
-# ---------------------------------------------------------
-# 2. Permutation importance on held-out test data
-# ---------------------------------------------------------
+
 permutation = permutation_importance(
     rf_best_pipeline,
     X_test,
@@ -436,9 +397,7 @@ print(
     )
 )
 
-# ---------------------------------------------------------
-# 3. Aggregate impurity importance to original features
-# ---------------------------------------------------------
+
 original_importance = {}
 
 for feature, importance in zip(
@@ -486,9 +445,7 @@ print(
     )
 )
 
-# ---------------------------------------------------------
-# 4. Compare the SAME original features using permutation
-# ---------------------------------------------------------
+
 comparison_df = top5_original_impurity.merge(
     permutation_df[
         ["feature", "importance_mean", "importance_std"]
@@ -528,9 +485,7 @@ print(
     )
 )
 
-# ---------------------------------------------------------
-# 5. Features losing the most importance
-# ---------------------------------------------------------
+
 loss_df = comparison_df.sort_values(
     "importance_loss",
     ascending=False,
@@ -563,19 +518,14 @@ print(
     "real predictive signal."
 )
 
-# ---------------------------------------------------------
-# TASK 8 - SUBGROUP / ROOT-CAUSE ANALYSIS
-# ---------------------------------------------------------
+
 from sklearn.metrics import precision_score, recall_score
 
 print("\n" + "=" * 60)
 print("TASK 8 - SUBGROUP / ROOT-CAUSE ANALYSIS")
 print("=" * 60)
 
-# ---------------------------------------------------------
-# 1. Get the winning Random Forest predictions
-# ---------------------------------------------------------
-# Use the default 0.50 threshold here for subgroup evaluation.
+
 rf_predictions = (
     rf_test_probabilities >= 0.50
 ).astype(int)
@@ -586,9 +536,7 @@ test_results = X_test.copy()
 test_results["actual_returned"] = y_test.values
 test_results["predicted_returned"] = rf_predictions
 
-# ---------------------------------------------------------
-# 2. Recall and precision by product category
-# ---------------------------------------------------------
+
 category_results = []
 
 for category in sorted(
@@ -634,9 +582,7 @@ print(
     )
 )
 
-# ---------------------------------------------------------
-# 3. Recall and precision by payment method
-# ---------------------------------------------------------
+
 payment_results = []
 
 for payment in sorted(
@@ -682,9 +628,7 @@ print(
     )
 )
 
-# ---------------------------------------------------------
-# 4. Overall Random Forest recall and precision
-# ---------------------------------------------------------
+
 overall_recall = recall_score(
     y_test,
     rf_predictions,
@@ -703,9 +647,7 @@ print("\nOverall Random Forest test performance:")
 print(f"Recall   : {overall_recall:.4f}")
 print(f"Precision: {overall_precision:.4f}")
 
-# ---------------------------------------------------------
-# 5. Identify the weakest subgroup
-# ---------------------------------------------------------
+
 category_df["recall_gap"] = (
     overall_recall - category_df["recall"]
 )
@@ -722,7 +664,7 @@ payment_df["precision_gap"] = (
     overall_precision - payment_df["precision"]
 )
 
-# Find subgroup with the largest recall gap
+
 worst_category_recall = category_df.loc[
     category_df["recall_gap"].idxmax()
 ]
@@ -743,9 +685,7 @@ print(
     f"recall={worst_payment_recall['recall']:.4f}"
 )
 
-# ---------------------------------------------------------
-# 6. Root-cause / next-step recommendation
-# ---------------------------------------------------------
+
 print("\nRecommended next step:")
 
 if (
@@ -770,18 +710,14 @@ else:
         f"precision."
     )
 
-    # ---------------------------------------------------------
-# TASK 9 - FINAL MODEL + RANDOM FOREST THRESHOLD
-# ---------------------------------------------------------
+
 import joblib
 
 print("\n" + "=" * 60)
 print("TASK 9 - FINAL MODEL ARTIFACT")
 print("=" * 60)
 
-# ---------------------------------------------------------
-# 1. Sweep the Random Forest's own probability output
-# ---------------------------------------------------------
+
 rf_thresholds = np.arange(0.10, 0.9001, 0.02)
 
 rf_threshold_results = []
@@ -825,7 +761,7 @@ rf_threshold_df = pd.DataFrame(
     rf_threshold_results
 )
 
-# Find the F1-maximizing Random Forest threshold
+
 best_rf_row = rf_threshold_df.loc[
     rf_threshold_df["f1"].idxmax()
 ]
@@ -853,9 +789,7 @@ print(f"F1        : {rf_best_f1:.4f}")
 print(f"Recall    : {rf_best_recall:.4f}")
 print(f"Precision : {rf_best_precision:.4f}")
 
-# ---------------------------------------------------------
-# 2. Save the winning fitted Random Forest pipeline
-# ---------------------------------------------------------
+
 models_dir = Path(__file__).resolve().parent.parent / "models"
 models_dir.mkdir(parents=True, exist_ok=True)
 
