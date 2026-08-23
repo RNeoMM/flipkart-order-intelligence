@@ -1,0 +1,99 @@
+TEST: Multi-turn conversational state
+
+Turn 1 user:
+My order ORD2007 is delayed.
+
+Turn 1 output:
+{
+  "response": {
+    "answer": "For order ORD2007: A delayed shipment may receive a revised delivery estimate based on the latest carrier and seller information. Please check the specific order page for the latest order-specific update.",
+    "source": "policy_kb",
+    "confidence": 0.4704
+  },
+  "state_snapshot": {
+    "order_id": "ORD2007",
+    "intent": "policy",
+    "user_message": "My order ORD2007 is delayed."
+  },
+  "intent": "policy",
+  "retrieval_results": [
+    {
+      "chunk_id": "POL007_C2",
+      "document_id": "POL007",
+      "title": "Delayed Delivery Handling",
+      "text": "A delayed shipment may receive a revised delivery estimate based on the latest carrier and seller information.",
+      "similarity": 0.47044509649276733
+    },
+    {
+      "chunk_id": "POL007_C1",
+      "document_id": "POL007",
+      "title": "Delayed Delivery Handling",
+      "text": "When an order passes its displayed estimated delivery date, the customer can use the order support flow to request an update.",
+      "similarity": 0.38516315817832947
+    },
+    {
+      "chunk_id": "POL008_C2",
+      "document_id": "POL008",
+      "title": "Reverse Pickup Eligibility",
+      "text": "Pickup can be unavailable in some locations or for items requiring customer drop-off instead.",
+      "similarity": 0.3567110598087311
+    }
+  ],
+  "grounding_result": {
+    "grounded": true,
+    "best_similarity": 0.47044509649276733,
+    "threshold": 0.45,
+    "message": "Retrieved policy evidence is sufficient."
+  },
+  "return_risk_result": null,
+  "image_result": null
+}
+
+Turn 2 user:
+What can I do about that order?
+
+Turn 2 output:
+{
+  "response": {
+    "answer": "For order ORD2007: A delayed shipment may receive a revised delivery estimate based on the latest carrier and seller information. Please check the specific order page for the latest order-specific update.",
+    "source": "policy_kb",
+    "confidence": 0.4704
+  },
+  "state_snapshot": {
+    "order_id": "ORD2007",
+    "intent": "policy",
+    "user_message": "What can I do about that order?"
+  },
+  "intent": "policy",
+  "retrieval_results": [
+    {
+      "chunk_id": "POL007_C2",
+      "document_id": "POL007",
+      "title": "Delayed Delivery Handling",
+      "text": "A delayed shipment may receive a revised delivery estimate based on the latest carrier and seller information.",
+      "similarity": 0.47044509649276733
+    },
+    {
+      "chunk_id": "POL007_C1",
+      "document_id": "POL007",
+      "title": "Delayed Delivery Handling",
+      "text": "When an order passes its displayed estimated delivery date, the customer can use the order support flow to request an update.",
+      "similarity": 0.38516315817832947
+    },
+    {
+      "chunk_id": "POL008_C2",
+      "document_id": "POL008",
+      "title": "Reverse Pickup Eligibility",
+      "text": "Pickup can be unavailable in some locations or for items requiring customer drop-off instead.",
+      "similarity": 0.3567110598087311
+    }
+  ],
+  "grounding_result": {
+    "grounded": true,
+    "best_similarity": 0.47044509649276733,
+    "threshold": 0.45,
+    "message": "Retrieved policy evidence is sufficient."
+  },
+  "return_risk_result": null,
+  "image_result": null
+}

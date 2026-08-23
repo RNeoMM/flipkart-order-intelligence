@@ -1,0 +1,50 @@
+TEST: Policy question - COD refund
+
+User:
+How long does a COD refund usually take after the return is approved?
+
+Agent output:
+{
+  "response": {
+    "answer": "Once initiated, the refund is normally credited to the bank account or other approved destination within 5 to 7 business days. Please check the specific order page for any item-specific eligibility shown there.",
+    "source": "policy_kb",
+    "confidence": 0.6804
+  },
+  "state_snapshot": {
+    "order_id": null,
+    "intent": "policy",
+    "user_message": "How long does a COD refund usually take after the return is approved?"
+  },
+  "intent": "policy",
+  "retrieval_results": [
+    {
+      "chunk_id": "POL004_C2",
+      "document_id": "POL004",
+      "title": "COD Refund Timeline",
+      "text": "Once initiated, the refund is normally credited to the bank account or other approved destination within 5 to 7 business days.",
+      "similarity": 0.6804348826408386
+    },
+    {
+      "chunk_id": "POL005_C2",
+      "document_id": "POL005",
+      "title": "Prepaid Refund Timeline",
+      "text": "The amount is normally credited back to the original payment method within 3 to 5 business days after refund initiation.",
+      "similarity": 0.5909437537193298
+    },
+    {
+      "chunk_id": "POL005_C1",
+      "document_id": "POL005",
+      "title": "Prepaid Refund Timeline",
+      "text": "For an eligible prepaid return, the refund is initiated after the returned product passes verification.",
+      "similarity": 0.49056464433670044
+    }
+  ],
+  "grounding_result": {
+    "grounded": true,
+    "best_similarity": 0.6804348826408386,
+    "threshold": 0.45,
+    "message": "Retrieved policy evidence is sufficient."
+  },
+  "return_risk_result": null,
+  "image_result": null
+}

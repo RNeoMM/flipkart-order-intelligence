@@ -1,0 +1,44 @@
+TEST: Return-risk tool
+
+User:
+Is order ORD1001 likely to be returned?
+
+Order features:
+{
+  "price_inr": 2499,
+  "discount_pct": 20,
+  "customer_tenure_days": 900,
+  "num_previous_orders": 18,
+  "num_previous_returns": 2,
+  "delivery_distance_km": 12,
+  "delivery_days": 4,
+  "is_weekend_order": 0,
+  "rating_given": 1,
+  "product_category": "Apparel",
+  "payment_method": "COD"
+}
+
+Agent output:
+{
+  "response": {
+    "answer": "For order ORD1001, the predicted return probability is 52.61%, which falls into the Medium risk bucket.",
+    "source": "return_risk_tool",
+    "confidence": 0.5261
+  },
+  "state_snapshot": {
+    "order_id": "ORD1001",
+    "intent": "return_risk",
+    "user_message": "Is order ORD1001 likely to be returned?"
+  },
+  "intent": "return_risk",
+  "retrieval_results": [],
+  "grounding_result": {},
+  "return_risk_result": {
+    "return_probability": 0.5260934525924563,
+    "risk_bucket": "Medium",
+    "threshold_t_rf": 0.5,
+    "medium_cutoff": 0.5,
+    "high_cutoff": 0.65
+  },
+  "image_result": null
+}

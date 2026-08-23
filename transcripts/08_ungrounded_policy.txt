@@ -1,0 +1,59 @@
+TEST: Ungrounded policy refusal
+
+User:
+Do you have a policy for restaurant table reservations?
+
+Best similarity:
+0.2450
+
+Groundedness threshold:
+0.45
+
+Grounded:
+False
+
+Agent output:
+{
+  "response": {
+    "answer": "I don't have sufficiently similar policy information in the knowledge base to answer that safely.",
+    "source": "policy_kb",
+    "confidence": 0.0
+  },
+  "state_snapshot": {
+    "order_id": null,
+    "intent": "policy",
+    "user_message": "Do you have a policy for restaurant table reservations?"
+  },
+  "intent": "policy",
+  "retrieval_results": [
+    {
+      "chunk_id": "POL011_C2",
+      "document_id": "POL011",
+      "title": "Non-Returnable Items",
+      "text": "The product page and order page should be treated as the source of the item's specific return eligibility.",
+      "similarity": 0.2449600249528885
+    },
+    {
+      "chunk_id": "POL008_C2",
+      "document_id": "POL008",
+      "title": "Reverse Pickup Eligibility",
+      "text": "Pickup can be unavailable in some locations or for items requiring customer drop-off instead.",
+      "similarity": 0.2249409556388855
+    },
+    {
+      "chunk_id": "POL013_C2",
+      "document_id": "POL013",
+      "title": "Replacement Eligibility",
+      "text": "Replacement availability depends on stock, product category, location, and the applicable order policy.",
+      "similarity": 0.22461913526058197
+    }
+  ],
+  "grounding_result": {
+    "grounded": false,
+    "best_similarity": 0.2449600249528885,
+    "threshold": 0.45,
+    "message": "I don't have sufficiently similar policy information in the knowledge base to answer that safely."
+  },
+  "return_risk_result": null,
+  "image_result": null
+}
