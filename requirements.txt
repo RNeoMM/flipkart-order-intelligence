@@ -3,3 +3,6 @@ pandas
 scikit-learn
 joblib
 matplotlib
+pillow
+torch
+torchvision
