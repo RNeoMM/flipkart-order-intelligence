@@ -1,0 +1,50 @@
+TEST: Policy question - apparel/footwear
+
+User:
+What is the return window for footwear?
+
+Agent output:
+{
+  "response": {
+    "answer": "Apparel and footwear items are eligible for return within 7 days of delivery when the item is unused, undamaged, and has its original tags and packaging. Please check the specific order page for any item-specific eligibility shown there.",
+    "source": "policy_kb",
+    "confidence": 0.52
+  },
+  "state_snapshot": {
+    "order_id": null,
+    "intent": "policy",
+    "user_message": "What is the return window for footwear?"
+  },
+  "intent": "policy",
+  "retrieval_results": [
+    {
+      "chunk_id": "POL001_C1",
+      "document_id": "POL001",
+      "title": "Apparel and Footwear Return Window",
+      "text": "Apparel and footwear items are eligible for return within 7 days of delivery when the item is unused, undamaged, and has its original tags and packaging.",
+      "similarity": 0.5200445055961609
+    },
+    {
+      "chunk_id": "POL011_C2",
+      "document_id": "POL011",
+      "title": "Non-Returnable Items",
+      "text": "The product page and order page should be treated as the source of the item's specific return eligibility.",
+      "similarity": 0.4104683995246887
+    },
+    {
+      "chunk_id": "POL014_C1",
+      "document_id": "POL014",
+      "title": "Return Condition Requirements",
+      "text": "Returned products should normally include the relevant accessories, tags, manuals, and original packaging where applicable.",
+      "similarity": 0.35036343336105347
+    }
+  ],
+  "grounding_result": {
+    "grounded": true,
+    "best_similarity": 0.5200445055961609,
+    "threshold": 0.45,
+    "message": "Retrieved policy evidence is sufficient."
+  },
+  "return_risk_result": null,
+  "image_result": null
+}

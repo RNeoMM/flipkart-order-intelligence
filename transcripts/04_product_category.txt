@@ -1,0 +1,31 @@
+TEST: Product-category tool
+
+User:
+What category is this product image?
+
+Image:
+data/sample_images/07_sneaker.png
+
+Agent output:
+{
+  "response": {
+    "answer": "The product image is classified as Sneaker with 99.85% confidence.",
+    "source": "image_classifier_tool",
+    "confidence": 0.9985
+  },
+  "state_snapshot": {
+    "order_id": null,
+    "intent": "product_category",
+    "user_message": "What category is this product image?"
+  },
+  "intent": "product_category",
+  "retrieval_results": [],
+  "grounding_result": {},
+  "return_risk_result": null,
+  "image_result": {
+    "label": "Sneaker",
+    "class_id": 7,
+    "confidence": 0.9985365867614746,
+    "image_path": "data/sample_images/07_sneaker.png"
+  }
+}

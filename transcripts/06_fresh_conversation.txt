@@ -1,0 +1,50 @@
+TEST: Fresh conversation state reset
+
+New conversation user:
+What can I do about that order?
+
+Agent output:
+{
+  "response": {
+    "answer": "I don't have an order ID in this conversation. Please provide the order ID so I can help with that specific order.",
+    "source": "policy_kb",
+    "confidence": 0.0
+  },
+  "state_snapshot": {
+    "order_id": null,
+    "intent": "policy",
+    "user_message": "What can I do about that order?"
+  },
+  "intent": "policy",
+  "retrieval_results": [
+    {
+      "chunk_id": "POL010_C1",
+      "document_id": "POL010",
+      "title": "Wrong Product Received",
+      "text": "If the delivered product does not match the item ordered, the customer should raise a return or replacement request within the applicable product window.",
+      "similarity": 0.45266592502593994
+    },
+    {
+      "chunk_id": "POL009_C1",
+      "document_id": "POL009",
+      "title": "Damaged Product Return",
+      "text": "A product reported as damaged on delivery should be reported within the return or replacement window shown for the order.",
+      "similarity": 0.36337894201278687
+    },
+    {
+      "chunk_id": "POL001_C2",
+      "document_id": "POL001",
+      "title": "Apparel and Footwear Return Window",
+      "text": "The return request must be raised within the applicable return window shown on the order.",
+      "similarity": 0.36153870820999146
+    }
+  ],
+  "grounding_result": {
+    "grounded": true,
+    "best_similarity": 0.45266592502593994,
+    "threshold": 0.45,
+    "message": "Retrieved policy evidence is sufficient."
+  },
+  "return_risk_result": null,
+  "image_result": null
+}

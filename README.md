@@ -59,3 +59,67 @@ ImageNet mean:
 
 ```text
 [0.485, 0.456, 0.406]
+
+
+# Part 3 - Flipkart Support Agent
+
+Part 3 connects the Part 1 return-risk model, the Part 2 product-image classifier, and a local policy knowledge base into one LangGraph support assistant.
+
+## Part 3 Architecture
+
+The assistant uses the following flow:
+
+User message
+→ input guardrail
+→ intent classification
+→ conditional routing
+→ policy retrieval or model tool
+→ grounded response generation
+→ structured JSON response
+
+The graph contains six nodes:
+
+- input_guardrail
+- intent
+- policy_retrieval
+- return_risk_tool
+- product_image_tool
+- response
+
+Conditional edges route requests according to intent:
+
+- policy → policy retrieval
+- return_risk → Part 1 return-risk tool
+- product_category → Part 2 image-classifier tool
+
+## Policy Knowledge Base
+
+The knowledge base contains 14 project-authored policy documents.
+
+Each policy document contains multiple sentences and is split sentence-wise into 28 chunks.
+
+Each chunk retains its parent `document_id` so retrieval evaluation can be performed at the document level.
+
+The main policy topics include:
+
+- apparel and footwear returns
+- electronics returns
+- home-product returns
+- COD refunds
+- prepaid refunds
+- delivery SLAs
+- delayed delivery
+- reverse pickup
+- damaged products
+- wrong products
+- non-returnable items
+- refund after reverse pickup
+- replacement eligibility
+- return-condition requirements
+
+## Embedding and Vector Search
+
+Policy chunks are embedded locally using:
+
+```text
+all-MiniLM-L6-v2
