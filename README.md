@@ -356,3 +356,15 @@ python -m part3_support_agent.save_transcripts
 ```
 
 The complete project runs locally using the saved models, FAISS knowledge base, and deterministic `MOCK_LLM` mode without requiring a paid LLM API.
+
+## Verification
+
+The support agent was tested locally in default `MOCK_LLM` mode.
+
+Return-risk tool verification:
+
+* `t*_rf`: 0.46
+* Medium cutoff: 0.46
+* High cutoff: 0.61
+
+The agent also verifies multi-turn state, fresh-conversation reset, prompt-injection blocking, and refusal of ungrounded policy questions.
