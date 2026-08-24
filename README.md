@@ -14,7 +14,6 @@ The project combines:
 
 ```text
 flipkart-order-intelligence/
-
 ├── README.md
 ├── requirements.txt
 ├── .gitignore
@@ -32,69 +31,83 @@ flipkart-order-intelligence/
 
 # Part 1 - Return Risk
 
-Part 1 builds a return-risk prediction pipeline from order data.
+Part 1 generates a deterministic order dataset and trains a return-risk model using scikit-learn.
 
-The final model is a tuned Random Forest saved as:
+The final tuned Random Forest pipeline is saved as:
 
 ```text
 models/return_risk_model.pkl
 ```
 
-The Random Forest F1-maximising threshold is:
+Dataset summary:
 
 ```text
-t*_rf = 0.50
+Rows: 6000
+Columns: 13
+Return rate: 22.75%
+Missing rating_given: 13.05%
+Missingness: MAR
 ```
 
-The Part 3 risk buckets use this threshold:
+The final Random Forest F1-maximising threshold is:
 
 ```text
-Low: < 0.50
-Medium: 0.50 to < 0.65
-High: >= 0.65
+t*_rf = 0.46
 ```
 
-The saved pipeline is loaded directly by the Part 3 return-risk tool.
+Part 3 uses this threshold for risk buckets:
+
+```text
+Low: < 0.46
+Medium: 0.46 to < 0.61
+High: >= 0.61
+```
+
+The saved Random Forest is loaded directly by the Part 3 return-risk tool.
+
+### Run Part 1
+
+Generate the dataset:
+
+```bash
+python part1_return_risk/generate_orders.py
+```
+
+Train and evaluate the return-risk pipeline:
+
+```bash
+python part1_return_risk/return_risk.py
+```
 
 # Part 2 - Product Image Categoriser
 
-Part 2 uses the real Fashion-MNIST dataset and a pretrained ResNet-18 model.
+Part 2 uses the Fashion-MNIST dataset with a pretrained ResNet-18 model.
 
 ## Dataset
 
-The pipeline uses:
+```text
+Training:   55,000
+Validation: 5,000
+Test:       10,000
+Classes:    10
+```
 
-- 55,000 training images
-- 5,000 validation images
-- 10,000 test images
-- 10 product classes
-
-Source:
-
-https://github.com/zalandoresearch/fashion-mnist
+Source: [Fashion-MNIST](https://github.com/zalandoresearch/fashion-mnist)
 
 ## Preprocessing
 
-The original grayscale images are:
+Images are:
 
-- converted from 1 channel to 3 channels
-- resized to 224x224
-- normalized using ImageNet mean and standard deviation
+* converted from 1 channel to 3 channels
+* resized to 224x224
+* normalized with ImageNet mean/std
 
 ```text
 Mean: [0.485, 0.456, 0.406]
 Std:  [0.229, 0.224, 0.225]
 ```
 
-## Model
-
-A pretrained ResNet-18 backbone is frozen during feature extraction.
-
-The extracted 512-dimensional features are cached and used to train a new 10-class classifier head.
-
-Training uses Adam with a learning rate of `0.001` and a batch size of `256`.
-
-## Result
+A pretrained ResNet-18 backbone is used for feature extraction, with a new 10-class classifier head trained using Adam.
 
 Final test accuracy:
 
@@ -102,23 +115,29 @@ Final test accuracy:
 88.61%
 ```
 
-The model exceeded the required 80% test accuracy.
+The main real confusion pairs were:
 
-The largest real confusion pairs were:
+```text
+Shirt -> T-shirt/top: 126 errors
+Shirt -> Coat:        104 errors
+```
 
-- Shirt -> T-shirt/top: 126 errors
-- Shirt -> Coat: 104 errors
-
-The saved model is:
+The trained model is saved as:
 
 ```text
 models/product_classifier.pt
 ```
 
-Ten real Fashion-MNIST test images are exported to:
+Real test images are exported to:
 
 ```text
 data/sample_images/
+```
+
+### Run Part 2
+
+```bash
+python part2_image_classifier/train_classifier.py
 ```
 
 # Part 3 - Flipkart Support Agent
@@ -144,44 +163,32 @@ Response Generation
 Structured JSON
 ```
 
-The graph contains:
-
-- input guardrail
-- intent node
-- policy retrieval node
-- return-risk tool
-- product-image tool
-- response node
+The graph includes an intent node, retrieval node, tool-calling logic, response generation, and conditional routing.
 
 ## Policy Knowledge Base
 
-The knowledge base contains 14 project-authored policy documents.
+The project contains 14 authored policy documents split into 28 sentence-level chunks.
 
-The documents are split sentence-wise into 28 chunks.
+Topics include:
 
-Each chunk keeps its parent `document_id` for document-level retrieval evaluation.
-
-Main topics include:
-
-- apparel and footwear returns
-- electronics returns
-- home returns
-- COD refunds
-- delivery timelines
-- reverse pickup
-- damaged or wrong products
-- non-returnable items
-- replacements
+* apparel and footwear returns
+* electronics and home returns
+* COD refunds
+* delivery timelines
+* reverse pickup
+* damaged or incorrect products
+* non-returnable items
+* replacements
 
 ## Embeddings and Search
 
-Chunks are embedded locally with:
+Chunks are embedded locally using:
 
 ```text
 all-MiniLM-L6-v2
 ```
 
-and indexed using:
+and indexed with:
 
 ```text
 FAISS
@@ -199,11 +206,10 @@ The agent loads:
 models/return_risk_model.pkl
 ```
 
-Verified example:
+and uses the saved Random Forest probability output with:
 
 ```text
-Probability: 52.61%
-Risk bucket: Medium
+t*_rf = 0.46
 ```
 
 ### Product Image
@@ -214,32 +220,24 @@ The agent loads:
 models/product_classifier.pt
 ```
 
-and works with the real PNG files in `data/sample_images/`.
-
-Verified example:
+and predicts from the real PNG files in:
 
 ```text
-07_sneaker.png
-Prediction: Sneaker
-Confidence: 99.85%
+data/sample_images/
 ```
 
 ## Prompt Design
 
-The response generator follows the 4S principles:
+The response generator uses the 4S principles:
 
-- Specific
-- Short
-- Surround
-- Single
+* Specific
+* Short
+* Surround
+* Single
 
-It also uses role prompting and few-shot intent examples for:
+It also uses role prompting and few-shot intent examples.
 
-- policy
-- return risk
-- product category
-
-Final responses use:
+Final responses follow this JSON structure:
 
 ```json
 {
@@ -255,13 +253,13 @@ Final responses use:
 
 It is deterministic and requires:
 
-- no API key
-- no paid LLM
-- no external LLM call
+* no API key
+* no paid LLM
+* no external LLM call
 
 ## Guardrails
 
-Input-side filtering blocks prompt-injection patterns such as:
+Input-side filtering blocks common prompt-injection patterns such as:
 
 ```text
 ignore previous instructions
@@ -269,7 +267,7 @@ ignore all rules
 pretend you are...
 ```
 
-For policy questions, the groundedness threshold is:
+Policy answers also use a groundedness threshold of:
 
 ```text
 0.45
@@ -283,11 +281,11 @@ Threshold: 0.45
 Grounded: False
 ```
 
-The agent correctly refused to invent a policy answer.
+The agent correctly refused to answer without sufficient supporting information.
 
 ## Conversational State
 
-The agent keeps short-term state within a conversation.
+Short-term state is maintained within a conversation.
 
 Example:
 
@@ -301,42 +299,39 @@ What can I do about that order?
 
 The order ID remains available as `ORD2007`.
 
-A new conversation starts without that state and asks for the order ID again.
+A fresh conversation starts with no previous order ID.
 
 ## Retrieval Evaluation
 
-Retrieval is evaluated at the document level after deduplicating chunks.
+Evaluation is performed at the document level after mapping and deduplicating retrieved chunks.
 
-| Query | Precision@3 | Recall@3 |
-|---|---:|---:|
-| Q1 | 0.3333 | 1.0000 |
-| Q2 | 0.3333 | 0.5000 |
-| Q3 | 0.3333 | 1.0000 |
-| Q4 | 0.3333 | 1.0000 |
-| Q5 | 0.6667 | 1.0000 |
-| Average | **0.4000** | **0.9000** |
+| Query       | Precision@3 |   Recall@3 |
+| ----------- | ----------: | ---------: |
+| Q1          |      0.3333 |     1.0000 |
+| Q2          |      0.3333 |     0.5000 |
+| Q3          |      0.3333 |     1.0000 |
+| Q4          |      0.3333 |     1.0000 |
+| Q5          |      0.6667 |     1.0000 |
+| **Average** |  **0.4000** | **0.9000** |
 
 ## Transcripts
 
-The required test conversations are saved in:
+The required test conversations are available here:
 
-```text
-transcripts/
-```
-
-They cover:
-
-- policy questions
-- return-risk prediction
-- product-image classification
-- multi-turn state
-- fresh conversation
-- prompt injection
-- ungrounded policy refusal
+* [Policy - Apparel](transcripts/01_policy_apparel.txt)
+* [Policy - COD Refund](transcripts/02_policy_cod_refund.txt)
+* [Return Risk](transcripts/03_return_risk.txt)
+* [Product Category](transcripts/04_product_category.txt)
+* [Multi-turn State](transcripts/05_multiturn_state.txt)
+* [Fresh Conversation](transcripts/06_fresh_conversation.txt)
+* [Prompt Injection](transcripts/07_prompt_injection.txt)
+* [Ungrounded Policy](transcripts/08_ungrounded_policy.txt)
 
 ## Running the Project
 
 From the repository root:
+
+Run the full support agent:
 
 ```bash
 python -m part3_support_agent.graph
@@ -348,7 +343,7 @@ Run retrieval evaluation:
 python -m part3_support_agent.retrival_eval
 ```
 
-Run MOCK_LLM tests:
+Run the MOCK_LLM module:
 
 ```bash
 python -m part3_support_agent.mock_llm
@@ -360,4 +355,16 @@ Regenerate transcripts:
 python -m part3_support_agent.save_transcripts
 ```
 
-The complete system runs locally without requiring a paid LLM API.
+The complete project runs locally using the saved models, FAISS knowledge base, and deterministic `MOCK_LLM` mode without requiring a paid LLM API.
+
+## Verification
+
+The support agent was tested locally in default `MOCK_LLM` mode.
+
+Return-risk tool verification:
+
+* `t*_rf`: 0.46
+* Medium cutoff: 0.46
+* High cutoff: 0.61
+
+The agent also verifies multi-turn state, fresh-conversation reset, prompt-injection blocking, and refusal of ungrounded policy questions.
